@@ -1,21 +1,48 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kilonova Games | 锻星工坊</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
     <style>
+        /* 本地注入Google Fonts字体配置 */
+        /* Share Tech Mono */
+        @font-face {
+            font-family: 'Share Tech Mono';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('./fonts/sharetechmono-latin.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        /* Archivo Black - Latin Ext */
+        @font-face {
+            font-family: 'Archivo Black';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('./fonts/archivoblack-latin-ext.woff2') format('woff2');
+            unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+
+        /* Archivo Black - Latin */
+        @font-face {
+            font-family: 'Archivo Black';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('./fonts/archivoblack-latin.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
         :root {
             --bg-color: #050505;
             --text-main: #e0e0e0;
-            --tech-font: 'Share Tech Mono', monospace;
-            --heavy-font: 'Arial Black', 'Archivo Black', sans-serif;
+            --tech-font: 'Share Tech Mono', Consolas, 'Courier New', monospace;
+            --heavy-font: 'Archivo Black', 'Arial Black', Impact, sans-serif;
             --ember-color: #ff4500;
         }
 
@@ -35,11 +62,14 @@
 
         /* 1. 熔炉余烬 */
         #ember-field {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 0;
-            pointer-events: none;/* 让鼠标点击穿透图片层 */
+            pointer-events: none;
+            /* 让鼠标点击穿透Canvas图层 */
         }
 
         /* 2. UI 容器 */
@@ -61,7 +91,7 @@
             letter-spacing: -1px;
             text-transform: uppercase;
             color: #fff;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
         /* 中文标题 */
@@ -72,8 +102,8 @@
             letter-spacing: 1.2rem;
             margin-top: 10px;
             margin-bottom: 50px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            padding-left: 1.2rem; 
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding-left: 1.2rem;
         }
 
         /* Slogan */
@@ -94,7 +124,7 @@
         /* 倒计时容器 */
         .countdown-wrapper {
             margin-bottom: 60px;
-            opacity: 0.9; 
+            opacity: 0.9;
         }
 
         .countdown-label {
@@ -102,7 +132,8 @@
             font-size: 0.8rem;
             color: #555;
             letter-spacing: 3px;
-            margin-bottom: 8px; /* 稍微拉开一点间距 */
+            margin-bottom: 8px;
+            /* 稍微拉开一点间距 */
         }
 
         /*字体*/
@@ -110,11 +141,13 @@
             font-family: var(--heavy-font);
             font-weight: 900;
             font-size: 2.5rem;
-            color: #ddd; 
+            color: #ddd;
             letter-spacing: 2px;
-            font-variant-numeric: tabular-nums; 
+            font-variant-numeric: tabular-nums;
             animation: glitch-skew 3s infinite linear alternate-reverse;
             text-shadow: 2px 2px 0px #311;
+            will-change: transform;
+            /* 开启 GPU 硬件加速 */
         }
 
         /* 页脚 */
@@ -131,30 +164,81 @@
 
         /* 动画定义 */
         @keyframes forge-breath {
-            0%, 100% { color: #844; border-color: #311; text-shadow: none;}
-            50% { color: #f55; border-color: #833; text-shadow: 0 0 10px rgba(255, 50, 0, 0.3); }
+
+            0%,
+            100% {
+                color: #844;
+                border-color: #311;
+                text-shadow: none;
+            }
+
+            50% {
+                color: #f55;
+                border-color: #833;
+                text-shadow: 0 0 10px rgba(255, 50, 0, 0.3);
+            }
         }
 
         @keyframes glitch-skew {
-            0% { transform: skew(0deg); }
-            20% { transform: skew(0deg); }
-            22% { transform: skew(1deg); }
-            24% { transform: skew(0deg); }
-            80% { transform: skew(0deg); }
-            82% { transform: skew(-1deg); }
-            84% { transform: skew(0deg); }
-            100% { transform: skew(0deg); }
+            0% {
+                transform: skew(0deg);
+            }
+
+            20% {
+                transform: skew(0deg);
+            }
+
+            22% {
+                transform: skew(1deg);
+            }
+
+            24% {
+                transform: skew(0deg);
+            }
+
+            80% {
+                transform: skew(0deg);
+            }
+
+            82% {
+                transform: skew(-1deg);
+            }
+
+            84% {
+                transform: skew(0deg);
+            }
+
+            100% {
+                transform: skew(0deg);
+            }
         }
 
         /* 移动端适配 */
         @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            .cn-title { font-size: 1.2rem; letter-spacing: 0.5rem; padding-left: 0.5rem;}
-            #countdown { font-size: 1.5rem; letter-spacing: 1px; } 
-            .slogan { font-size: 0.9rem; border: none; color: #855;}
+            h1 {
+                font-size: 3rem;
+            }
+
+            .cn-title {
+                font-size: 1.2rem;
+                letter-spacing: 0.5rem;
+                padding-left: 0.5rem;
+            }
+
+            #countdown {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+
+            .slogan {
+                font-size: 0.9rem;
+                border: none;
+                color: #855;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <canvas id="ember-field"></canvas>
@@ -179,20 +263,32 @@
         // --- 熔炉余烬引擎 (Ember Engine) ---
         const canvas = document.getElementById('ember-field');
         const ctx = canvas.getContext('2d');
-        
+
         let width, height;
         let embers = [];
 
+        let resizeTimeout;
         function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            initEmbers();
+            // 防抖，避免拖拉窗口触发大量重绘
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const dpr = window.devicePixelRatio || 1;
+                width = window.innerWidth;
+                height = window.innerHeight;
+
+                // 适配高清屏渲染，防止Canvas发虚模糊
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+
+                initEmbers();
+            }, 200);
         }
 
         class Ember {
             constructor() {
                 this.reset();
-                this.y = Math.random() * height; 
+                this.y = Math.random() * height;
             }
 
             reset() {
@@ -206,9 +302,10 @@
                 this.color = colors[Math.floor(Math.random() * colors.length)];
             }
 
-            update() {
-                this.y -= this.speed;
-                this.opacity -= this.fadeRate;
+            // 引入 timeScale，基于真实时间计算动画，而非帧率
+            update(timeScale) {
+                this.y -= this.speed * timeScale;
+                this.opacity -= this.fadeRate * timeScale;
                 if (this.y < -10 || this.opacity <= 0) {
                     this.reset();
                 }
@@ -227,21 +324,48 @@
             for (let i = 0; i < 150; i++) embers.push(new Ember());
         }
 
-        function animate() {
+        // 初次加载页面时，绑定事件并初始化画布大小
+        function initialResize() {
+            const dpr = window.devicePixelRatio || 1;
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            initEmbers();
+        }
+
+        let lastTime = 0;
+        function animate(time) {
+            const deltaTime = time - lastTime;
+            lastTime = time;
+
+            // 限制最大时间差
+            const dt = Math.min(deltaTime, 50);
+            const timeScale = dt / 16.66; // 以 60Hz屏幕 (16.66ms) 作为基准速度
+
             ctx.clearRect(0, 0, width, height);
             embers.forEach(ember => {
-                ember.update();
+                ember.update(timeScale);
                 ember.draw();
             });
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', resize);
-        resize();
-        animate();
+        initialResize();
+
+        // 启动动画并捕获第一帧的时间
+        requestAnimationFrame((time) => {
+            lastTime = time;
+            animate(time);
+        });
 
         // --- 倒计时逻辑 ---
         const targetDate = new Date("June 10, 2026 18:00:00").getTime();
+
+        // 把DOM查询放到循环体外部，因为节点不会改变
+        const countdownEl = document.getElementById("countdown");
 
         setInterval(() => {
             const now = new Date().getTime();
@@ -254,11 +378,10 @@
 
             const pad = (n) => n < 10 ? '0' + n : n;
             const text = `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-            
-            const el = document.getElementById("countdown");
-            el.innerText = distance < 0 ? "LAUNCHED" : text;
+
+            countdownEl.innerText = distance < 0 ? "LAUNCHED" : text;
         }, 1000);
     </script>
 </body>
-</html>
 
+</html>
